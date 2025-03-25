@@ -1,42 +1,62 @@
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { AuthProvider } from './hooks/useAuth';
+import ProtectedRoute from './components/ProtectedRoute';
+import ErrorBoundary from './components/ErrorBoundary';
 
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AuthProvider } from "@/hooks/useAuth";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import Login from "./pages/Login";
-import Register from "./pages/Register";
-import Dashboard from "./pages/Dashboard";
-import Books from "./pages/Books";
-import BookDetail from "./pages/BookDetail";
-import Admin from "./pages/Admin";
+// Import all pages
+import Login from './pages/Login';
+import Register from './pages/Register';
+import Dashboard from './pages/Dashboard';
+import Books from './pages/Books';
+import BookDetail from './pages/BookDetail';
+import Admin from './pages/Admin';
+import Unauthorized from './pages/Unauthorized';
+import NotFound from './pages/NotFound';
 
-const queryClient = new QueryClient();
+// Loan and Member Management Pages (Placeholder)
+import ManageLoans from './pages/ManageLoans';
+import ManageMembers from './pages/ManageMembers';
 
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <AuthProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
+const App: React.FC = () => {
+  return (
+    <ErrorBoundary>
+      <BrowserRouter>
+        <AuthProvider>
           <Routes>
-            <Route path="/" element={<Index />} />
+            {/* Default Route */}
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/books" element={<Books />} />
-            <Route path="/books/:id" element={<BookDetail />} />
-            <Route path="/admin" element={<Admin />} />
+            <Route path="/unauthorized" element={<Unauthorized />} />
+
+            {/* Member Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['member', 'staff', 'admin']} />}>
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/books" element={<Books />} />
+              <Route path="/books/:id" element={<BookDetail />} />
+            </Route>
+
+            {/* Staff Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['staff', 'admin']} />}>
+              <Route path="/manage/loans" element={<ManageLoans />} />
+            </Route>
+
+            {/* Admin Routes */}
+            <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+              <Route path="/admin" element={<Admin />} />
+              <Route path="/manage/members" element={<ManageMembers />} />
+            </Route>
+
+            {/* 404 Route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </BrowserRouter>
-      </AuthProvider>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+        </AuthProvider>
+      </BrowserRouter>
+    </ErrorBoundary>
+  );
+};
 
 export default App;

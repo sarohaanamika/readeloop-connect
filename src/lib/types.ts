@@ -9,6 +9,7 @@ export interface User {
   membershipStartDate?: string;
   address?: string;
   phoneNumber?: string;
+  token?: string;
 }
 
 export interface Author {
