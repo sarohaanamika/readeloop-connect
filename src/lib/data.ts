@@ -1,5 +1,5 @@
 
-import { Author, Book, Loan, Publisher, User } from "./types";
+import { Author, Book, Loan, Publisher, User, UserRole } from "./types";
 
 // Sample Publishers
 export const publishers: Publisher[] = [
@@ -206,41 +206,86 @@ export const books: Book[] = [
 ];
 
 // Sample Users
+
 export const users: User[] = [
   {
     id: "user1",
     name: "John Doe",
     email: "john.doe@example.com",
-    role: "member",
+    password: "password", // Add password field
+    role: UserRole.MEMBER,
+    permissions: {
+      canManageBooks: false,
+      canManageUsers: false,
+      canBorrowBooks: true
+    },
     membershipStartDate: "2023-01-15",
     address: "123 Main St, Anytown, USA",
     phoneNumber: "555-123-4567",
+    profile: {
+      avatarUrl: "/images/avatars/john-doe.jpg",
+      membershipType: "Standard",
+      joinDate: "2023-01-15"
+    }
   },
   {
     id: "user2",
     name: "Jane Smith",
     email: "jane.smith@example.com",
-    role: "member",
+    password: "password", // Add password field
+    role: UserRole.MEMBER,
+    permissions: {
+      canManageBooks: false,
+      canManageUsers: false,
+      canBorrowBooks: true
+    },
     membershipStartDate: "2023-02-20",
     address: "456 Oak Ave, Somewhere, USA",
     phoneNumber: "555-987-6543",
+    profile: {
+      avatarUrl: "/images/avatars/jane-smith.jpg",
+      membershipType: "Standard",
+      joinDate: "2023-02-20"
+    }
   },
   {
     id: "user3",
     name: "Robert Johnson",
     email: "robert.johnson@example.com",
-    role: "staff",
+    password: "password", // Add password field
+    role: UserRole.STAFF,
+    permissions: {
+      canManageBooks: true,
+      canManageUsers: false,
+      canBorrowBooks: true
+    },
     address: "789 Elm St, Nowhere, USA",
     phoneNumber: "555-456-7890",
+    profile: {
+      avatarUrl: "/images/avatars/robert-johnson.jpg",
+      membershipType: "Staff",
+      joinDate: "2023-03-01"
+    }
   },
   {
     id: "user4",
     name: "Sarah Williams",
     email: "sarah.williams@example.com",
-    role: "admin",
+    password: "password", // Add password field
+    role: UserRole.ADMIN,
+    permissions: {
+      canManageBooks: true,
+      canManageUsers: true,
+      canBorrowBooks: true
+    },
     address: "101 Pine Rd, Everywhere, USA",
     phoneNumber: "555-234-5678",
-  },
+    profile: {
+      avatarUrl: "/images/avatars/sarah-williams.jpg",
+      membershipType: "Admin",
+      joinDate: "2023-01-01"
+    }
+  }
 ];
 
 // Sample Loans

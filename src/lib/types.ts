@@ -1,15 +1,57 @@
 
-export type UserRole = 'member' | 'staff' | 'admin';
+// export type UserRole = 'member' | 'staff' | 'admin';
+
+export enum UserRole {
+  ADMIN = 'admin',
+  STAFF = 'staff',
+  MEMBER = 'member'
+}
+
+export interface Profile {
+  avatarUrl?: string;
+  membershipType?: string;
+  joinDate: string;
+}
 
 export interface User {
   id: string;
   name: string;
   email: string;
+  password?: string;
   role: UserRole;
+  token?: string;
+  permissions: {
+    canManageBooks: boolean;
+    canManageUsers: boolean;
+    canBorrowBooks: boolean;
+  }
   membershipStartDate?: string;
   address?: string;
   phoneNumber?: string;
-  token?: string;
+  profile?: Profile;
+}
+
+export const getRolePermissions = (role: UserRole) => {
+  switch (role) {
+    case UserRole.ADMIN:
+      return {
+        canManageBooks: true,
+        canManageUsers: true,
+        canBorrowBooks: true
+      };
+    case UserRole.STAFF:
+      return {
+        canManageBooks: true,
+        canManageUsers: false,
+        canBorrowBooks: true
+      };
+    case UserRole.MEMBER:
+      return {
+        canManageBooks: false,
+        canManageUsers: false,
+        canBorrowBooks: true
+      };
+  }
 }
 
 export interface Author {

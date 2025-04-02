@@ -203,3 +203,56 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
+
+
+
+
+// import React from 'react';
+// import { Link } from 'react-router-dom';
+// import { useAuth } from '../../hooks/useAuth';
+// import { UserRole } from '../../lib/types';
+
+// const Sidebar: React.FC = () => {
+//   const { user } = useAuth();
+
+//   const getNavItems = () => {
+//     const baseItems = [
+//       { label: 'Dashboard', path: '/dashboard', roles: [UserRole.ADMIN, UserRole.STAFF, UserRole.MEMBER] },
+//       { label: 'Browse Books', path: '/books', roles: [UserRole.ADMIN, UserRole.STAFF, UserRole.MEMBER] },
+//       { label: 'My Loans', path: '/my-loans', roles: [UserRole.STAFF, UserRole.MEMBER] }
+//     ];
+
+//     const adminItems = [
+//       { label: 'Manage Books', path: '/manage-books', roles: [UserRole.ADMIN] },
+//       { label: 'Manage Users', path: '/manage-users', roles: [UserRole.ADMIN] }
+//     ];
+
+//     const staffItems = [
+//       { label: 'Manage Loans', path: '/manage-loans', roles: [UserRole.STAFF] }
+//     ];
+
+//     return [
+//       ...baseItems,
+//       ...(user?.role === UserRole.ADMIN ? adminItems : []),
+//       ...(user?.role === UserRole.STAFF ? staffItems : [])
+//     ];
+//   };
+
+//   const navItems = getNavItems();
+
+//   return (
+//     <div className="sidebar">
+//       {navItems.map((item) => (
+//         <Link 
+//           key={item.path} 
+//           to={item.path} 
+//           className="sidebar-item"
+//         >
+//           {item.label}
+//         </Link>
+//       ))}
+//     </div>
+//   );
+// };
+
+// export default Sidebar;

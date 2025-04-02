@@ -1,0 +1,40 @@
+{
+    "users": [
+      {
+        "id": 1,
+        "name": "Sarah Williams",
+        "email": "sarah.williams@example.com",
+        "password": "password",
+        "role": "admin",
+        "profile": {
+          "avatarUrl": "/images/avatars/sarah-williams.jpg",
+          "membershipType": "Admin",
+          "joinDate": "2022-01-15"
+        }
+      },
+      {
+        "id": 2,
+        "name": "Robert Johnson",
+        "email": "robert.johnson@example.com", 
+        "password": "password",
+        "role": "staff",
+        "profile": {
+          "avatarUrl": "/images/avatars/robert-johnson.jpg",
+          "membershipType": "Staff",
+          "joinDate": "2023-03-20"
+        }
+      },
+      {
+        "id": 3,
+        "name": "John Doe",
+        "email": "john.doe@example.com",
+        "password": "password", 
+        "role": "member",
+        "profile": {
+          "avatarUrl": "/images/avatars/john-doe.jpg",
+          "membershipType": "Standard",
+          "joinDate": "2024-01-10"
+        }
+      }
+    ]
+  }

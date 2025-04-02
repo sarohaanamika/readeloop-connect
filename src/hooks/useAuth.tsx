@@ -1,7 +1,6 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { AuthContextType, User } from "@/lib/types";
+import { AuthContextType, User, UserRole } from "@/lib/types";
 import { users } from "@/lib/data";
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -26,18 +25,21 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
-    // Simulate API call
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        // In a real app, you'd check password hash against DB
-        // Here we just check the email exists in our sample data
-        const foundUser = users.find(u => u.email === email);
+        // Find user with matching email and password
+        const foundUser = users.find(
+          u => u.email === email && u.password === password
+        );
         
         if (foundUser) {
-          setUser(foundUser);
+          // Remove password before storing
+          const { password: _, ...userWithoutPassword } = foundUser;
+          
+          setUser(userWithoutPassword);
           setIsAuthenticated(true);
-          localStorage.setItem("libraryUser", JSON.stringify(foundUser));
-          toast.success(`Welcome back, ${foundUser.name}!`);
+          localStorage.setItem("libraryUser", JSON.stringify(userWithoutPassword));
+          toast.success(`Welcome back, ${userWithoutPassword.name}!`);
           resolve();
         } else {
           toast.error("Invalid email or password");
@@ -48,7 +50,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   const register = async (userData: Partial<User>, password: string): Promise<void> => {
-    // Simulate API call
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         // Check if email already exists
@@ -59,16 +60,48 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           reject(new Error("Email already in use"));
           return;
         }
+
+        // Function to get default permissions based on role
+        const getDefaultPermissions = (role: UserRole) => {
+          switch (role) {
+            case UserRole.ADMIN:
+              return {
+                canManageBooks: true,
+                canManageUsers: true,
+                canBorrowBooks: true
+              };
+            case UserRole.STAFF:
+              return {
+                canManageBooks: true,
+                canManageUsers: false,
+                canBorrowBooks: true
+              };
+            case UserRole.MEMBER:
+            default:
+              return {
+                canManageBooks: false,
+                canManageUsers: false,
+                canBorrowBooks: true
+              };
+          }
+        };
         
-        // Create new user (in a real app, this would be saved to DB)
+        // Create new user
         const newUser: User = {
           id: `user${users.length + 1}`,
           name: userData.name || "New User",
           email: userData.email || "",
-          role: "member",
+          password: password,
+          role: UserRole.MEMBER,
+          permissions: getDefaultPermissions(UserRole.MEMBER), // Dynamically assign permissions
           membershipStartDate: new Date().toISOString().split('T')[0],
           address: userData.address,
           phoneNumber: userData.phoneNumber,
+          profile: {
+            avatarUrl: "/images/avatars/default.jpg",
+            membershipType: "Standard",
+            joinDate: new Date().toISOString().split('T')[0]
+          }
         };
         
         // Add to mock data (in a real app, this would be saved to DB)

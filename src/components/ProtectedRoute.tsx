@@ -1,24 +1,63 @@
+// import { Navigate, Outlet } from 'react-router-dom';
+// import { useAuth } from '../hooks/useAuth';
+
+// type ProtectedRouteProps = {
+//   allowedRoles?: ('member' | 'staff' | 'admin')[];
+// };
+
+// const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+//   allowedRoles = ['member', 'staff', 'admin'] 
+// }) => {
+//   const { user, isAuthenticated } = useAuth();
+
+//   if (!isAuthenticated) {
+//     return <Navigate to="/login" replace />;
+//   }
+
+//   if (user && allowedRoles.includes(user.role)) {
+//     return <Outlet />;
+//   }
+
+//   return <Navigate to="/unauthorized" replace />;
+// };
+
+// export default ProtectedRoute;
+
+
+// src/components/ui/ProtectedRoute.tsx
+import React, { ReactNode } from 'react';
 import { Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
+import { UserRole } from '../lib/types';
 
-type ProtectedRouteProps = {
-  allowedRoles?: ('member' | 'staff' | 'admin')[];
-};
+interface ProtectedRouteProps {
+  children?: ReactNode;
+  allowedRoles?: UserRole[];
+}
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
-  allowedRoles = ['member', 'staff', 'admin'] 
+  children, 
+  allowedRoles 
 }) => {
   const { user, isAuthenticated } = useAuth();
 
+  // Check if user is authenticated
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && allowedRoles.includes(user.role)) {
-    return <Outlet />;
+  // Check if user has allowed role
+  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
+    return <Navigate to="/unauthorized" replace />;
   }
 
-  return <Navigate to="/unauthorized" replace />;
+  // If children are provided, render them
+  if (children) {
+    return <>{children}</>;
+  }
+
+  // Otherwise, use Outlet for nested routes
+  return <Outlet />;
 };
 
 export default ProtectedRoute;
