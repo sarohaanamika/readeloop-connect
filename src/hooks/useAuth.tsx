@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { UserRole } from "@/lib/types";
@@ -75,6 +74,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     try {
       // If user metadata is not provided, fetch from the database
       if (!userData) {
+        // Use the table we know exists in Supabase
         const { data, error } = await supabase
           .from('users')
           .select('*')
@@ -229,8 +229,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           name: userData.name || 'New User',
           email: userData.email || '',
           role: UserRole.MEMBER,
-          address: userData.address,
-          phone_number: userData.phoneNumber,
+          address: userData.address || '',
+          phone_number: userData.phoneNumber || '',
           membership_type: 'standard',
           membership_start_date: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString()

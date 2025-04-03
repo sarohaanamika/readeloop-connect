@@ -15,3 +15,45 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
     autoRefreshToken: true,
   }
 });
+
+// Extended Database Types for the entire application
+export type DatabaseExtended = Database & {
+  public: {
+    Tables: {
+      payments: {
+        Row: {
+          id: string;
+          user_id: string;
+          amount: number;
+          description: string;
+          payment_status: string;
+          payment_method: string;
+          created_at: string;
+        };
+        Insert: {
+          user_id: string;
+          amount: number;
+          description: string;
+          payment_status: string;
+          payment_method: string;
+        };
+        Update: {
+          user_id?: string;
+          amount?: number;
+          description?: string;
+          payment_status?: string;
+          payment_method?: string;
+        };
+      };
+    };
+  };
+};
+
+// Use this type-safe client for tables that are not in the generated types
+export const supabaseExtended = createClient<DatabaseExtended>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});

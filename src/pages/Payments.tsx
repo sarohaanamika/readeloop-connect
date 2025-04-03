@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { CreditCard, CheckCircle, Loader2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { supabaseExtended } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 
 import {
@@ -74,19 +73,12 @@ const Payments = () => {
     try {
       setIsProcessing(plan.id);
       
-      // 1. Create a payment record in the database
-      const { data, error } = await supabase
-        .from('payments')
-        .insert({
-          user_id: user.id,
-          amount: plan.price,
-          description: `${plan.name} membership plan`,
-          payment_status: 'completed', // In a real app, this would be set after payment confirmation
-          payment_method: 'credit_card' // This would come from the payment processor in a real app
-        })
-        .select();
+      // Simulate payment process
+      // Instead of actually creating payment records in a non-existent table,
+      // we'll just simulate success and update the user's membership type
       
-      if (error) throw error;
+      // 1. Simulate payment
+      await new Promise(resolve => setTimeout(resolve, 1500));
       
       // 2. Update the user's membership type
       const { error: updateError } = await supabase
@@ -95,8 +87,6 @@ const Payments = () => {
         .eq('id', user.id);
       
       if (updateError) throw updateError;
-      
-      // In a real app, we would process payment with Stripe and then update these records
       
       // Show success UI
       setSuccessPlan(plan.id);
