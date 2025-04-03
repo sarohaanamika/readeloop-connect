@@ -12,27 +12,31 @@ import { toast } from "sonner";
 const Login = () => {
   const { login } = useAuth();
   const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: any) => {
     try {
+      setIsLoading(true);
       setError(null);
       await login(data.email, data.password);
     } catch (err) {
       setError("Invalid email or password. Please try again.");
-      toast.error("Login failed. Please check your credentials.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
-  const handleAdminLogin = () => {
-    login("sarah.williams@example.com", "password");
-  };
-
-  const handleStaffLogin = () => {
-    login("robert.johnson@example.com", "password");
-  };
-
-  const handleMemberLogin = () => {
-    login("john.doe@example.com", "password");
+  const handleDemoLogin = async (email: string, password: string) => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      await login(email, password);
+    } catch (err) {
+      setError("Could not log in with demo account. Please try again.");
+      toast.error("Login failed. Please try again with the regular login form.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -89,7 +93,8 @@ const Login = () => {
                 type="button"
                 variant="outline"
                 className="border-primary/30 text-primary hover:bg-primary/5"
-                onClick={handleAdminLogin}
+                onClick={() => handleDemoLogin("admin@athenaeum.com", "password123")}
+                disabled={isLoading}
               >
                 Sign in as Admin
               </Button>
@@ -98,7 +103,8 @@ const Login = () => {
                 type="button"
                 variant="outline"
                 className="border-primary/30 text-primary hover:bg-primary/5"
-                onClick={handleStaffLogin}
+                onClick={() => handleDemoLogin("staff@athenaeum.com", "password123")}
+                disabled={isLoading}
               >
                 Sign in as Staff
               </Button>
@@ -107,7 +113,8 @@ const Login = () => {
                 type="button"
                 variant="outline"
                 className="border-primary/30 text-primary hover:bg-primary/5"
-                onClick={handleMemberLogin}
+                onClick={() => handleDemoLogin("member@athenaeum.com", "password123")}
+                disabled={isLoading}
               >
                 Sign in as Member
               </Button>

@@ -1,4 +1,5 @@
 
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Book } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
@@ -9,9 +10,13 @@ import { toast } from "sonner";
 
 const Register = () => {
   const { register } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (data: any) => {
     try {
+      setIsLoading(true);
+      setError(null);
       await register(
         {
           name: data.name,
@@ -23,9 +28,11 @@ const Register = () => {
       );
       
       toast.success("Registration successful! You can now log in.");
-    } catch (error) {
+    } catch (error: any) {
       console.error("Registration error:", error);
-      toast.error("Registration failed. Please try again.");
+      setError(error.message || "Registration failed. Please try again.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -59,6 +66,12 @@ const Register = () => {
           </div>
           
           <div className="bg-white shadow rounded-xl p-6 space-y-6">
+            {error && (
+              <div className="bg-red-50 text-red-600 p-3 rounded-lg text-sm font-medium">
+                {error}
+              </div>
+            )}
+            
             <AuthForm type="register" onSubmit={handleSubmit} />
           </div>
         </div>
