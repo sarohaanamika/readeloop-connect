@@ -59,8 +59,9 @@ export const Books: React.FC = () => {
     applyFilters();
   }, [filters]);
 
-  const handleSearch = (searchTerm: string) => {
-    setFilters(prev => ({ ...prev, search: searchTerm }));
+  // Fix #1: Update the handleSearch function to accept a BookFilter object instead of a string
+  const handleSearch = (filterData: BookFilter) => {
+    setFilters(prev => ({ ...prev, ...filterData }));
   };
 
   const handleGenreFilter = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -135,9 +136,11 @@ export const Books: React.FC = () => {
           ) : filteredBooks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredBooks.map(book => (
+                // Fix #2: Update BookCard props to use 'className' instead of 'onClick'
                 <BookCard
                   key={book.id}
                   book={book}
+                  className="cursor-pointer"
                   onClick={() => handleBookClick(book.id)}
                 />
               ))}

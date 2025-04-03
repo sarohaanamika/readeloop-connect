@@ -9,9 +9,10 @@ interface BookCardProps {
   book: Book;
   className?: string;
   featured?: boolean;
+  onClick?: () => void;  // Added onClick prop
 }
 
-const BookCard = ({ book, className, featured = false }: BookCardProps) => {
+const BookCard = ({ book, className, featured = false, onClick }: BookCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
 
   // Rating stars
@@ -37,17 +38,43 @@ const BookCard = ({ book, className, featured = false }: BookCardProps) => {
     );
   };
 
+  // If onClick is provided, use a button instead of a Link
+  const CardWrapper = ({ children }: { children: React.ReactNode }) => {
+    if (onClick) {
+      return (
+        <button
+          onClick={onClick}
+          className={cn(
+            "group flex flex-col rounded-xl overflow-hidden transition-all duration-500 bg-white border border-border hover:shadow-lg text-left w-full",
+            featured ? "md:flex-row" : "h-full",
+            className
+          )}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        >
+          {children}
+        </button>
+      );
+    }
+    
+    return (
+      <Link
+        to={`/books/${book.id}`}
+        className={cn(
+          "group flex flex-col rounded-xl overflow-hidden transition-all duration-500 bg-white border border-border hover:shadow-lg",
+          featured ? "md:flex-row" : "h-full",
+          className
+        )}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {children}
+      </Link>
+    );
+  };
+
   return (
-    <Link
-      to={`/books/${book.id}`}
-      className={cn(
-        "group flex flex-col rounded-xl overflow-hidden transition-all duration-500 bg-white border border-border hover:shadow-lg",
-        featured ? "md:flex-row" : "h-full",
-        className
-      )}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
-    >
+    <CardWrapper>
       <div 
         className={cn(
           "relative overflow-hidden bg-gray-100",
@@ -114,7 +141,7 @@ const BookCard = ({ book, className, featured = false }: BookCardProps) => {
           </span>
         </div>
       </div>
-    </Link>
+    </CardWrapper>
   );
 };
 

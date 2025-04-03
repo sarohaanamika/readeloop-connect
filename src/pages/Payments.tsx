@@ -81,7 +81,7 @@ const Payments = () => {
       await new Promise(resolve => setTimeout(resolve, 1500));
       
       // 2. Update the user's membership type
-      const { error: updateError } = await supabase
+      const { error: updateError } = await supabaseExtended
         .from('users')
         .update({ membership_type: plan.id })
         .eq('id', user.id);
