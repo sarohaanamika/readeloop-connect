@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -20,6 +21,7 @@ import {
   AlertDialogTrigger 
 } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
+import { supabase } from '@/lib/supabase';
 
 // Loan type based on ER diagram
 type Loan = {
@@ -41,14 +43,43 @@ const ManageLoans: React.FC = () => {
   useEffect(() => {
     const fetchLoans = async () => {
       try {
-        // Simulated API call - replace with actual endpoint
-        const response = await fetch('/api/loans', {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`
+        // Mock data for development until the actual API is implemented
+        const mockLoans: Loan[] = [
+          {
+            LoanID: '1',
+            MemberID: '101',
+            BookID: '201',
+            LoanDate: '2023-10-01',
+            DueDate: '2023-10-15',
+            status: 'active'
+          },
+          {
+            LoanID: '2',
+            MemberID: '102',
+            BookID: '202',
+            LoanDate: '2023-09-15',
+            DueDate: '2023-09-29',
+            ReturnDate: '2023-09-28',
+            status: 'returned'
+          },
+          {
+            LoanID: '3',
+            MemberID: '103',
+            BookID: '203',
+            LoanDate: '2023-09-01',
+            DueDate: '2023-09-15',
+            status: 'overdue'
           }
-        });
-        const data = await response.json();
-        setLoans(data);
+        ];
+        
+        setLoans(mockLoans);
+        
+        // Uncomment when Supabase is fully set up
+        // const { data, error } = await supabase
+        //   .from('loans')
+        //   .select('*');
+        // if (error) throw error;
+        // setLoans(data || []);
       } catch (error) {
         console.error('Failed to fetch loans', error);
       }
@@ -60,20 +91,22 @@ const ManageLoans: React.FC = () => {
   // Handle loan return
   const handleReturnLoan = async (loanId: string) => {
     try {
-      // Simulated API call to return loan
-      await fetch(`/api/loans/${loanId}/return`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${user?.token}`
-        }
-      });
-      
-      // Update local state
+      // Update local state first for immediate UI feedback
       setLoans(loans.map(loan => 
         loan.LoanID === loanId 
           ? { ...loan, status: 'returned', ReturnDate: new Date().toISOString() } 
           : loan
       ));
+      
+      // Uncomment when Supabase is fully set up
+      // const { error } = await supabase
+      //   .from('loans')
+      //   .update({ 
+      //     status: 'returned',
+      //     ReturnDate: new Date().toISOString()
+      //   })
+      //   .eq('LoanID', loanId);
+      // if (error) throw error;
     } catch (error) {
       console.error('Failed to return loan', error);
     }

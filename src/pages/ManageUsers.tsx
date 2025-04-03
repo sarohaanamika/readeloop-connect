@@ -1,6 +1,7 @@
+
 // src/pages/ManageUsers.tsx
 import React, { useState } from 'react';
-import ProtectedRoute from 'src/components/ProtectedRoute';
+import ProtectedRoute from '@/components/ProtectedRoute';
 import { UserRole, User, getRolePermissions } from '../lib/types';
 
 export const ManageUsers: React.FC = () => {

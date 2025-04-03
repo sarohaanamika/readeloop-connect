@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { 
   Table, 
@@ -18,6 +19,7 @@ import {
 import { useAuth } from '@/hooks/useAuth';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { supabase } from '@/lib/supabase';
 
 // Member type based on ER diagram
 type Member = {
@@ -38,14 +40,42 @@ const ManageMembers: React.FC = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        // Simulated API call - replace with actual endpoint
-        const response = await fetch('/api/members', {
-          headers: {
-            'Authorization': `Bearer ${user?.token}`
+        // Mock data for development until the actual API is implemented
+        const mockMembers: Member[] = [
+          {
+            MemberID: '101',
+            Name: 'John Doe',
+            Address: '123 Main St',
+            PhoneNumber: '555-123-4567',
+            Email: 'john@example.com',
+            MembershipStartDate: '2023-01-15'
+          },
+          {
+            MemberID: '102',
+            Name: 'Jane Smith',
+            Address: '456 Oak Ave',
+            PhoneNumber: '555-987-6543',
+            Email: 'jane@example.com',
+            MembershipStartDate: '2023-02-20'
+          },
+          {
+            MemberID: '103',
+            Name: 'Robert Johnson',
+            Address: '789 Pine Rd',
+            PhoneNumber: '555-456-7890',
+            Email: 'robert@example.com',
+            MembershipStartDate: '2023-03-10'
           }
-        });
-        const data = await response.json();
-        setMembers(data);
+        ];
+        
+        setMembers(mockMembers);
+        
+        // Uncomment when Supabase is fully set up
+        // const { data, error } = await supabase
+        //   .from('members')
+        //   .select('*');
+        // if (error) throw error;
+        // setMembers(data || []);
       } catch (error) {
         console.error('Failed to fetch members', error);
       }
@@ -57,21 +87,22 @@ const ManageMembers: React.FC = () => {
   // Handle new member creation
   const handleCreateMember = async () => {
     try {
-      const response = await fetch('/api/members', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${user?.token}`
-        },
-        body: JSON.stringify({
-          ...newMember,
-          MembershipStartDate: new Date().toISOString()
-        })
-      });
-
-      const createdMember = await response.json();
-      setMembers([...members, createdMember]);
+      // Create a new member with a generated ID
+      const newMemberWithId = {
+        ...newMember,
+        MemberID: Date.now().toString(),
+        MembershipStartDate: new Date().toISOString().split('T')[0]
+      } as Member;
+      
+      // Update UI immediately
+      setMembers([...members, newMemberWithId]);
       setNewMember({}); // Reset form
+      
+      // Uncomment when Supabase is fully set up
+      // const { error } = await supabase
+      //   .from('members')
+      //   .insert(newMemberWithId);
+      // if (error) throw error;
     } catch (error) {
       console.error('Failed to create member', error);
     }

@@ -1,7 +1,8 @@
+
 // src/pages/ManageBooks.tsx
 import React, { useState } from 'react';
-import { ProtectedRoute } from 'src/components/ProtectedRoute';
-import { UserRole } from '../lib/types';
+import ProtectedRoute from '@/components/ProtectedRoute';
+import { UserRole } from '@/lib/types';
 
 interface Book {
   id: string;
