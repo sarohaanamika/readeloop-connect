@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Search, X, Book, Filter, ChevronDown, Check } from "lucide-react";
 import { Input } from "@/components/ui/input";
@@ -11,9 +10,10 @@ interface SearchBarProps {
   initialFilters?: BookFilter;
   onSearch: (filters: BookFilter) => void;
   className?: string;
+  placeholder?: string;
 }
 
-const SearchBar = ({ initialFilters = {}, onSearch, className }: SearchBarProps) => {
+const SearchBar = ({ initialFilters = {}, onSearch, className, placeholder = "Search..." }: SearchBarProps) => {
   const [searchQuery, setSearchQuery] = useState(initialFilters.search || "");
   const [selectedGenre, setSelectedGenre] = useState(initialFilters.genre || "");
   const [isAvailableOnly, setIsAvailableOnly] = useState(initialFilters.available || false);
@@ -68,7 +68,7 @@ const SearchBar = ({ initialFilters = {}, onSearch, className }: SearchBarProps)
         <div className="relative flex-1">
           <Input
             type="search"
-            placeholder="Search by title, author, or ISBN..."
+            placeholder={placeholder}
             className="pl-10 py-6 rounded-xl shadow-sm bg-white focus-visible:ring-primary"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
