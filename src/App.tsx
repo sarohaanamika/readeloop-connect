@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
@@ -11,11 +12,12 @@ import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
 import Books from './pages/Books';
 import BookDetail from './pages/BookDetail';
+import Payments from './pages/Payments';
 import Admin from './pages/Admin';
 import Unauthorized from './pages/Unauthorized';
 import NotFound from './pages/NotFound';
 
-// Loan and Member Management Pages (Placeholder)
+// Loan and Member Management Pages
 import ManageLoans from './pages/ManageLoans';
 import ManageMembers from './pages/ManageMembers';
 
@@ -38,6 +40,7 @@ const App: React.FC = () => {
               <Route path="/dashboard" element={<Dashboard />} />
               <Route path="/books" element={<Books />} />
               <Route path="/books/:id" element={<BookDetail />} />
+              <Route path="/payments" element={<Payments />} />
             </Route>
 
             {/* Staff Routes */}

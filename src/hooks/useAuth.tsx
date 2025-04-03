@@ -2,7 +2,7 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { UserRole } from "@/lib/types";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import { useNavigate } from "react-router-dom";
 
 // Define user type that works with Supabase
@@ -19,6 +19,7 @@ export interface User {
   membershipStartDate?: string;
   address?: string;
   phoneNumber?: string;
+  membershipType?: string;
   profile?: {
     avatarUrl?: string;
     membershipType?: string;
@@ -94,6 +95,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role: defaultRole,
           permissions: getDefaultPermissions(defaultRole),
           membershipStartDate: new Date().toISOString().split('T')[0],
+          membershipType: 'standard',
           profile: {
             avatarUrl: "/images/avatars/default.jpg",
             membershipType: "Standard",
@@ -113,9 +115,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         membershipStartDate: userData.membership_start_date || new Date().toISOString().split('T')[0],
         address: userData.address,
         phoneNumber: userData.phone_number,
+        membershipType: userData.membership_type || 'standard',
         profile: {
           avatarUrl: userData.avatar_url || "/images/avatars/default.jpg",
-          membershipType: role === UserRole.ADMIN ? "Admin" : role === UserRole.STAFF ? "Staff" : "Standard",
+          membershipType: userData.membership_type ? 
+            userData.membership_type.charAt(0).toUpperCase() + userData.membership_type.slice(1) : 
+            "Standard",
           joinDate: userData.created_at || new Date().toISOString().split('T')[0]
         }
       };
@@ -226,6 +231,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           role: UserRole.MEMBER,
           address: userData.address,
           phone_number: userData.phoneNumber,
+          membership_type: 'standard',
           membership_start_date: new Date().toISOString().split('T')[0],
           created_at: new Date().toISOString()
         });

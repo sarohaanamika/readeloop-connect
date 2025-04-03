@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
@@ -15,6 +14,7 @@ import {
   Users,
   BookOpen,
   LogOut,
+  CreditCard
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -89,7 +89,9 @@ const Sidebar = () => {
               {!isCollapsed && (
                 <div className="overflow-hidden">
                   <p className="font-medium text-white truncate">{user.name}</p>
-                  <p className="text-xs text-white/60 truncate">{user.role}</p>
+                  <p className="text-xs text-white/60 truncate capitalize">
+                    {user.membershipType || 'standard'} member
+                  </p>
                 </div>
               )}
             </div>
@@ -116,6 +118,13 @@ const Sidebar = () => {
               label="My Loans" 
               isActive={isActive("/dashboard/loans")} 
               count={2}
+            />
+            
+            <SidebarLink 
+              to="/payments" 
+              icon={CreditCard} 
+              label="Membership" 
+              isActive={isActive("/payments")} 
             />
             
             <SidebarLink 
@@ -203,56 +212,3 @@ const Sidebar = () => {
 };
 
 export default Sidebar;
-
-
-
-
-// import React from 'react';
-// import { Link } from 'react-router-dom';
-// import { useAuth } from '../../hooks/useAuth';
-// import { UserRole } from '../../lib/types';
-
-// const Sidebar: React.FC = () => {
-//   const { user } = useAuth();
-
-//   const getNavItems = () => {
-//     const baseItems = [
-//       { label: 'Dashboard', path: '/dashboard', roles: [UserRole.ADMIN, UserRole.STAFF, UserRole.MEMBER] },
-//       { label: 'Browse Books', path: '/books', roles: [UserRole.ADMIN, UserRole.STAFF, UserRole.MEMBER] },
-//       { label: 'My Loans', path: '/my-loans', roles: [UserRole.STAFF, UserRole.MEMBER] }
-//     ];
-
-//     const adminItems = [
-//       { label: 'Manage Books', path: '/manage-books', roles: [UserRole.ADMIN] },
-//       { label: 'Manage Users', path: '/manage-users', roles: [UserRole.ADMIN] }
-//     ];
-
-//     const staffItems = [
-//       { label: 'Manage Loans', path: '/manage-loans', roles: [UserRole.STAFF] }
-//     ];
-
-//     return [
-//       ...baseItems,
-//       ...(user?.role === UserRole.ADMIN ? adminItems : []),
-//       ...(user?.role === UserRole.STAFF ? staffItems : [])
-//     ];
-//   };
-
-//   const navItems = getNavItems();
-
-//   return (
-//     <div className="sidebar">
-//       {navItems.map((item) => (
-//         <Link 
-//           key={item.path} 
-//           to={item.path} 
-//           className="sidebar-item"
-//         >
-//           {item.label}
-//         </Link>
-//       ))}
-//     </div>
-//   );
-// };
-
-// export default Sidebar;
