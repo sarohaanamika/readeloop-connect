@@ -1,6 +1,5 @@
-
-import { useState } from "react";
-import { Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Book } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/layout/Header";
@@ -10,16 +9,26 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const Login = () => {
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("User already authenticated, redirecting to dashboard");
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleSubmit = async (data: any) => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log("Attempting login with:", data.email);
       await login(data.email, data.password);
     } catch (err) {
+      console.error("Login error:", err);
       setError("Invalid email or password. Please try again.");
     } finally {
       setIsLoading(false);
@@ -30,8 +39,10 @@ const Login = () => {
     try {
       setIsLoading(true);
       setError(null);
+      console.log("Attempting demo login with:", email);
       await login(email, password);
     } catch (err) {
+      console.error("Demo login error:", err);
       setError("Could not log in with demo account. Please try again.");
       toast.error("Login failed. Please try again with the regular login form.");
     } finally {

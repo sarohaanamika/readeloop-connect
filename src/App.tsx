@@ -23,6 +23,8 @@ import ManageLoans from './pages/ManageLoans';
 import ManageMembers from './pages/ManageMembers';
 
 const App: React.FC = () => {
+  console.log("App rendering...");
+  
   return (
     <ErrorBoundary>
       <BrowserRouter>

@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { UserRole } from "@/lib/types";
@@ -135,20 +136,32 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initAuth = async () => {
       try {
         setLoading(true);
+        console.log("Initializing auth...");
+        
         // Get current session
         const { data: { session } } = await supabase.auth.getSession();
+        
+        console.log("Current session:", session ? "Found" : "Not found");
         
         if (session) {
           // Get user data from the users table
           const formattedUser = await formatUser(session.user);
           
           if (formattedUser) {
+            console.log("User authenticated:", formattedUser.email);
             setUser(formattedUser);
             setIsAuthenticated(true);
+          } else {
+            console.log("Failed to format user data");
+            setIsAuthenticated(false);
           }
+        } else {
+          console.log("No session found");
+          setIsAuthenticated(false);
         }
       } catch (error) {
         console.error("Auth initialization error:", error);
+        setIsAuthenticated(false);
       } finally {
         setLoading(false);
       }
@@ -157,13 +170,17 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     // Set up auth state change subscription
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log("Auth state changed:", event);
+        
         if (event === 'SIGNED_IN' && session) {
           const formattedUser = await formatUser(session.user);
           if (formattedUser) {
+            console.log("User signed in:", formattedUser.email);
             setUser(formattedUser);
             setIsAuthenticated(true);
           }
         } else if (event === 'SIGNED_OUT') {
+          console.log("User signed out");
           setUser(null);
           setIsAuthenticated(false);
         }
