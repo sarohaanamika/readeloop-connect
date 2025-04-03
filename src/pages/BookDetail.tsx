@@ -4,8 +4,9 @@ import { useParams, useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BookDetails from "@/components/ui/BookDetails";
-import { books } from "@/lib/data";
 import { Book } from "@/lib/types";
+import { fetchBookById } from "@/services/bookService";
+import { toast } from "sonner";
 
 const BookDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,20 +16,25 @@ const BookDetail = () => {
 
   useEffect(() => {
     if (id) {
-      // Simulate API call
       setIsLoading(true);
-      setTimeout(() => {
-        const foundBook = books.find(b => b.id === id);
-        
-        if (foundBook) {
-          setBook(foundBook);
-        } else {
-          // Book not found
-          navigate("/books", { replace: true });
-        }
-        
-        setIsLoading(false);
-      }, 800);
+      
+      fetchBookById(id)
+        .then(bookData => {
+          if (bookData) {
+            setBook(bookData);
+          } else {
+            // Book not found
+            toast.error("Book not found");
+            navigate("/books", { replace: true });
+          }
+        })
+        .catch(error => {
+          console.error("Error fetching book:", error);
+          toast.error("Failed to load book details");
+        })
+        .finally(() => {
+          setIsLoading(false);
+        });
     }
   }, [id, navigate]);
 

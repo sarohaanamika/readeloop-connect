@@ -9,6 +9,172 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      authors: {
+        Row: {
+          bio: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          bio?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          bio?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
+      book_authors: {
+        Row: {
+          author_id: string
+          book_id: string
+          id: string
+        }
+        Insert: {
+          author_id: string
+          book_id: string
+          id?: string
+        }
+        Update: {
+          author_id?: string
+          book_id?: string
+          id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "book_authors_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "authors"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "book_authors_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      books: {
+        Row: {
+          available_copies: number
+          cover_image: string | null
+          created_at: string
+          description: string | null
+          genre: string | null
+          id: string
+          isbn: string
+          publication_year: number | null
+          publisher_id: string | null
+          rating: number | null
+          title: string
+          total_copies: number
+        }
+        Insert: {
+          available_copies?: number
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          genre?: string | null
+          id?: string
+          isbn: string
+          publication_year?: number | null
+          publisher_id?: string | null
+          rating?: number | null
+          title: string
+          total_copies?: number
+        }
+        Update: {
+          available_copies?: number
+          cover_image?: string | null
+          created_at?: string
+          description?: string | null
+          genre?: string | null
+          id?: string
+          isbn?: string
+          publication_year?: number | null
+          publisher_id?: string | null
+          rating?: number | null
+          title?: string
+          total_copies?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "books_publisher_id_fkey"
+            columns: ["publisher_id"]
+            isOneToOne: false
+            referencedRelation: "publishers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      loans: {
+        Row: {
+          book_id: string
+          created_at: string
+          due_date: string
+          id: string
+          loan_date: string
+          member_id: string
+          return_date: string | null
+          status: string
+        }
+        Insert: {
+          book_id: string
+          created_at?: string
+          due_date: string
+          id?: string
+          loan_date?: string
+          member_id: string
+          return_date?: string | null
+          status: string
+        }
+        Update: {
+          book_id?: string
+          created_at?: string
+          due_date?: string
+          id?: string
+          loan_date?: string
+          member_id?: string
+          return_date?: string | null
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "loans_book_id_fkey"
+            columns: ["book_id"]
+            isOneToOne: false
+            referencedRelation: "books"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      publishers: {
+        Row: {
+          address: string | null
+          contact_info: string | null
+          id: string
+          name: string
+        }
+        Insert: {
+          address?: string | null
+          contact_info?: string | null
+          id?: string
+          name: string
+        }
+        Update: {
+          address?: string | null
+          contact_info?: string | null
+          id?: string
+          name?: string
+        }
+        Relationships: []
+      }
       users: {
         Row: {
           address: string | null

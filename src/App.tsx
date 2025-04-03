@@ -4,7 +4,8 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './hooks/useAuth';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
-import { UserRole } from './lib/types'; // Import UserRole enum
+import { UserRole } from './lib/types';
+import DatabaseInitializer from './components/DatabaseInitializer'; 
 
 // Import all pages
 import Login from './pages/Login';
@@ -26,6 +27,9 @@ const App: React.FC = () => {
     <ErrorBoundary>
       <BrowserRouter>
         <AuthProvider>
+          {/* Initialize database with sample data if needed */}
+          <DatabaseInitializer />
+          
           <Routes>
             {/* Default Route */}
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
