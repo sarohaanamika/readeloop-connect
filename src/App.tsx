@@ -23,6 +23,11 @@ import NotFound from './pages/NotFound';
 import ManageLoans from './pages/ManageLoans';
 import ManageMembers from './pages/ManageMembers';
 
+// New pages for sidebar navigation
+import MyLoans from './pages/MyLoans';
+import History from './pages/History';
+import Notifications from './pages/Notifications';
+
 const App: React.FC = () => {
   console.log("App rendering...");
   
@@ -51,6 +56,11 @@ const App: React.FC = () => {
               <Route path="/books" element={<Books />} />
               <Route path="/books/:id" element={<BookDetail />} />
               <Route path="/payments" element={<Payments />} />
+              
+              {/* New routes for sidebar navigation */}
+              <Route path="/dashboard/loans" element={<MyLoans />} />
+              <Route path="/dashboard/history" element={<History />} />
+              <Route path="/dashboard/notifications" element={<Notifications />} />
             </Route>
 
             {/* Staff Routes */}
