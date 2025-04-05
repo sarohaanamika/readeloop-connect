@@ -30,6 +30,7 @@ export interface User {
 export interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
+  isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
   register: (userData: Partial<User>, password: string) => Promise<void>;
   logout: () => Promise<void>;
@@ -40,7 +41,7 @@ const AuthContext = createContext<AuthContextType | null>(null);
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
-  const [loading, setLoading] = useState(true);
+  const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
 
   // Function to get default permissions based on role
@@ -73,6 +74,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     if (!authUser) return null;
 
     try {
+      console.log("Formatting user with authUser:", authUser.id);
+      
       // If user metadata is not provided, fetch from the database
       if (!userData) {
         // Use the table we know exists in Supabase
@@ -82,13 +85,38 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           .eq('id', authUser.id)
           .single();
 
-        if (error) throw error;
+        if (error) {
+          console.error("Error fetching user data:", error);
+          
+          // Try to create a basic user if we couldn't find one
+          const defaultRole = UserRole.MEMBER;
+          console.log("Creating basic user with default role:", defaultRole);
+          
+          return {
+            id: authUser.id,
+            email: authUser.email || '',
+            name: authUser.user_metadata?.name || 'User',
+            role: defaultRole,
+            permissions: getDefaultPermissions(defaultRole),
+            membershipStartDate: new Date().toISOString().split('T')[0],
+            membershipType: 'standard',
+            profile: {
+              avatarUrl: "/images/avatars/default.jpg",
+              membershipType: "Standard",
+              joinDate: new Date().toISOString().split('T')[0]
+            }
+          };
+        }
+        
         userData = data;
+        console.log("Found user data:", userData);
       }
 
       // If still no user data, create a basic user record
       if (!userData) {
         const defaultRole = UserRole.MEMBER;
+        console.log("No user data found, creating basic user with default role:", defaultRole);
+        
         return {
           id: authUser.id,
           email: authUser.email || '',
@@ -107,6 +135,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Return user with formatted data
       const role = (userData.role as UserRole) || UserRole.MEMBER;
+      console.log("Formatted user with role:", role);
+      
       return {
         id: authUser.id,
         email: authUser.email || userData.email,
@@ -131,11 +161,33 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // This function will be used to update the authentication state
+  const updateAuthState = async (session: any) => {
+    if (session) {
+      const formattedUser = await formatUser(session.user);
+      if (formattedUser) {
+        console.log("Setting authenticated user:", formattedUser.email);
+        setUser(formattedUser);
+        setIsAuthenticated(true);
+      } else {
+        console.log("Failed to format user data");
+        setUser(null);
+        setIsAuthenticated(false);
+      }
+    } else {
+      console.log("No session, user is not authenticated");
+      setUser(null);
+      setIsAuthenticated(false);
+    }
+    
+    setIsLoading(false);
+  };
+
   // Check for existing session on mount
   useEffect(() => {
     const initAuth = async () => {
       try {
-        setLoading(true);
+        setIsLoading(true);
         console.log("Initializing auth...");
         
         // Get current session
@@ -143,27 +195,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         
         console.log("Current session:", session ? "Found" : "Not found");
         
-        if (session) {
-          // Get user data from the users table
-          const formattedUser = await formatUser(session.user);
-          
-          if (formattedUser) {
-            console.log("User authenticated:", formattedUser.email);
-            setUser(formattedUser);
-            setIsAuthenticated(true);
-          } else {
-            console.log("Failed to format user data");
-            setIsAuthenticated(false);
-          }
-        } else {
-          console.log("No session found");
-          setIsAuthenticated(false);
-        }
+        await updateAuthState(session);
       } catch (error) {
         console.error("Auth initialization error:", error);
         setIsAuthenticated(false);
-      } finally {
-        setLoading(false);
+        setIsLoading(false);
       }
     };
 
@@ -172,18 +208,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       async (event, session) => {
         console.log("Auth state changed:", event);
         
-        if (event === 'SIGNED_IN' && session) {
-          const formattedUser = await formatUser(session.user);
-          if (formattedUser) {
-            console.log("User signed in:", formattedUser.email);
-            setUser(formattedUser);
-            setIsAuthenticated(true);
-          }
-        } else if (event === 'SIGNED_OUT') {
-          console.log("User signed out");
-          setUser(null);
-          setIsAuthenticated(false);
-        }
+        // Use setTimeout to prevent deadlocks with Supabase auth
+        setTimeout(async () => {
+          await updateAuthState(session);
+        }, 0);
       }
     );
 
@@ -207,13 +235,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
 
       if (data.user) {
-        const formattedUser = await formatUser(data.user);
-        if (formattedUser) {
-          setUser(formattedUser);
-          setIsAuthenticated(true);
-          toast.success(`Welcome back, ${formattedUser.name}!`);
-          navigate('/dashboard');
-        }
+        // Auth state will be updated by the onAuthStateChange listener
+        toast.success(`Login successful!`);
       }
     } catch (error: any) {
       console.error("Login error:", error.message);
@@ -269,8 +292,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const { error } = await supabase.auth.signOut();
       if (error) throw error;
       
-      setUser(null);
-      setIsAuthenticated(false);
+      // Auth state will be updated by the onAuthStateChange listener
       toast.success("Logged out successfully");
       navigate('/login');
     } catch (error: any) {
@@ -280,8 +302,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, isAuthenticated, login, register, logout }}>
-      {!loading && children}
+    <AuthContext.Provider value={{ user, isAuthenticated, isLoading, login, register, logout }}>
+      {children}
     </AuthContext.Provider>
   );
 };

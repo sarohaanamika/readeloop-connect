@@ -1,6 +1,7 @@
+
 import { useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { Book } from "lucide-react";
+import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Book, Loader2 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
@@ -9,17 +10,21 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const Login = () => {
-  const { login, isAuthenticated } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Get the intended destination from location state, or default to dashboard
+  const from = location.state?.from?.pathname || "/dashboard";
 
   useEffect(() => {
     if (isAuthenticated) {
-      console.log("User already authenticated, redirecting to dashboard");
-      navigate("/dashboard");
+      console.log("User is authenticated, redirecting to:", from);
+      navigate(from, { replace: true });
     }
-  }, [isAuthenticated, navigate]);
+  }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = async (data: any) => {
     try {
@@ -27,9 +32,11 @@ const Login = () => {
       setError(null);
       console.log("Attempting login with:", data.email);
       await login(data.email, data.password);
-    } catch (err) {
+      // Navigation will be handled by the useEffect when isAuthenticated changes
+    } catch (err: any) {
       console.error("Login error:", err);
-      setError("Invalid email or password. Please try again.");
+      setError(err.message || "Invalid email or password. Please try again.");
+      toast.error(err.message || "Login failed. Please check your credentials.");
     } finally {
       setIsLoading(false);
     }
@@ -41,14 +48,25 @@ const Login = () => {
       setError(null);
       console.log("Attempting demo login with:", email);
       await login(email, password);
-    } catch (err) {
+      // Navigation will be handled by the useEffect when isAuthenticated changes
+    } catch (err: any) {
       console.error("Demo login error:", err);
-      setError("Could not log in with demo account. Please try again.");
+      setError(err.message || "Could not log in with demo account. Please try again.");
       toast.error("Login failed. Please try again with the regular login form.");
     } finally {
       setIsLoading(false);
     }
   };
+
+  // If auth is still initializing, show loading
+  if (authLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Loading authentication...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -107,7 +125,12 @@ const Login = () => {
                 onClick={() => handleDemoLogin("admin@athenaeum.com", "password123")}
                 disabled={isLoading}
               >
-                Sign in as Admin
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : "Sign in as Admin"}
               </Button>
               
               <Button
@@ -117,7 +140,12 @@ const Login = () => {
                 onClick={() => handleDemoLogin("staff@athenaeum.com", "password123")}
                 disabled={isLoading}
               >
-                Sign in as Staff
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : "Sign in as Staff"}
               </Button>
               
               <Button
@@ -127,7 +155,12 @@ const Login = () => {
                 onClick={() => handleDemoLogin("member@athenaeum.com", "password123")}
                 disabled={isLoading}
               >
-                Sign in as Member
+                {isLoading ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Signing in...
+                  </>
+                ) : "Sign in as Member"}
               </Button>
             </div>
           </div>

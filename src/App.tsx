@@ -6,6 +6,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import { UserRole } from './lib/types';
 import DatabaseInitializer from './components/DatabaseInitializer'; 
+import { Toaster } from 'sonner';
 
 // Import all pages
 import Login from './pages/Login';
@@ -31,6 +32,9 @@ const App: React.FC = () => {
         <AuthProvider>
           {/* Initialize database with sample data if needed */}
           <DatabaseInitializer />
+          
+          {/* Toast notifications */}
+          <Toaster position="top-right" />
           
           <Routes>
             {/* Default Route */}
