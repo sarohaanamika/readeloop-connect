@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useAuth } from '@/hooks/useAuth';
 import { Loan } from '@/lib/types';
-import { fetchLoans, returnLoan } from '@/services/loanService';
+import { fetchLoans, returnLoan } from '@/services/loan';
 import AppLayout from '@/components/layout/AppLayout';
 import { toast } from 'sonner';
 
