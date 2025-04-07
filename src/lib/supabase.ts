@@ -2,10 +2,11 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '@/integrations/supabase/types';
 
-// Use the same Supabase URL and key across the application
+// Use the same Supabase URL and key as defined in the client integration
 const supabaseUrl = "https://sfaaeqbuylsqlmcyjota.supabase.co";
 const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmYWFlcWJ1eWxzcWxtY3lqb3RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NTAzNjYsImV4cCI6MjA1OTIyNjM2Nn0.sywEhVhqpDByp2ef4YcPBACTUXTBxUX-lP9YlN40Hy0";
 
+// Create a single supabase client instance to use throughout the app
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     storage: localStorage,
