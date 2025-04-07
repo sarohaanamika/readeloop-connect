@@ -6,7 +6,7 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import BookCard from '@/components/ui/BookCard';
 import SearchBar from '@/components/ui/SearchBar';
-import { fetchBooks, getGenres } from '@/services/bookService';
+import { fetchBooks, getGenres } from '@/services/book';
 import { toast } from 'sonner';
 
 export const Books: React.FC = () => {

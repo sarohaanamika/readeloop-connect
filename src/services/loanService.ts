@@ -69,8 +69,8 @@ export const fetchLoans = async (memberId?: string): Promise<Loan[]> => {
       
       // Transform member data to match User interface
       let member: User | undefined;
-      if (loan.member && typeof loan.member !== 'string' && !('error' in loan.member)) {
-        const memberData = loan.member;
+      if (loan.member && typeof loan.member === 'object') {
+        const memberData = loan.member as any;
         const role = (memberData.role as UserRole) || UserRole.MEMBER;
         member = {
           id: memberData.id,
@@ -196,8 +196,8 @@ export const createLoan = async (
     
     // Transform member data to match User interface
     let member: User | undefined;
-    if (data.member && typeof data.member !== 'string' && !('error' in data.member)) {
-      const memberData = data.member;
+    if (data.member && typeof data.member === 'object') {
+      const memberData = data.member as any;
       const role = (memberData.role as UserRole) || UserRole.MEMBER;
       member = {
         id: memberData.id,

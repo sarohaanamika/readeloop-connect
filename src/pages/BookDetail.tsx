@@ -5,7 +5,7 @@ import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import BookDetails from "@/components/ui/BookDetails";
 import { Book } from "@/lib/types";
-import { fetchBookById } from "@/services/bookService";
+import { fetchBookById } from "@/services/book";
 import { toast } from "sonner";
 
 const BookDetail = () => {
