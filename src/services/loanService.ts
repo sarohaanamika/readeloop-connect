@@ -1,6 +1,6 @@
 
 import { supabase } from "@/lib/supabase";
-import { Loan } from "@/lib/types";
+import { Loan, Book, User, UserRole, getRolePermissions } from "@/lib/types";
 
 export const fetchLoans = async (memberId?: string): Promise<Loan[]> => {
   try {
@@ -25,17 +25,72 @@ export const fetchLoans = async (memberId?: string): Promise<Loan[]> => {
     if (!data) return [];
     
     // Transform the Supabase response to match our Loan type
-    return data.map(loan => ({
-      id: loan.id,
-      memberId: loan.member_id,
-      bookId: loan.book_id,
-      loanDate: loan.loan_date,
-      dueDate: loan.due_date,
-      returnDate: loan.return_date,
-      status: loan.status,
-      book: loan.book,
-      member: loan.member
-    }));
+    return data.map(loan => {
+      // Ensure status is one of the allowed values
+      let status: "active" | "returned" | "overdue" = "active";
+      if (loan.status === "returned") status = "returned";
+      else if (loan.status === "overdue") status = "overdue";
+      
+      // Transform book data to match Book interface
+      let book: Book | undefined;
+      if (loan.book) {
+        const bookData = loan.book;
+        book = {
+          id: bookData.id,
+          title: bookData.title,
+          isbn: bookData.isbn,
+          coverImage: bookData.cover_image || '/placeholder.svg',
+          description: bookData.description || '',
+          genre: bookData.genre || '',
+          publicationYear: bookData.publication_year || 0,
+          publisherId: bookData.publisher_id || '',
+          publisher: {
+            id: bookData.publisher_id || '',
+            name: '', // We don't have publisher data here
+            address: '',
+            contactInfo: ''
+          },
+          authors: [], // We don't have authors data here
+          available: bookData.available_copies > 0,
+          rating: bookData.rating,
+          totalCopies: bookData.total_copies,
+          availableCopies: bookData.available_copies
+        };
+      }
+      
+      // Transform member data to match User interface
+      let member: User | undefined;
+      if (loan.member) {
+        const memberData = loan.member;
+        const role = (memberData.role || 'member') as UserRole;
+        member = {
+          id: memberData.id,
+          name: memberData.name,
+          email: memberData.email,
+          role: role,
+          permissions: getRolePermissions(role),
+          membershipStartDate: memberData.membership_start_date,
+          address: memberData.address,
+          phoneNumber: memberData.phone_number,
+          profile: {
+            joinDate: memberData.membership_start_date || new Date().toISOString(),
+            membershipType: memberData.membership_type
+          }
+        };
+      }
+
+      return {
+        id: loan.id,
+        memberId: loan.member_id,
+        bookId: loan.book_id,
+        loanDate: loan.loan_date,
+        dueDate: loan.due_date,
+        returnDate: loan.return_date,
+        status,
+        book,
+        member
+      };
+    });
   } catch (error) {
     console.error("Error in fetchLoans:", error);
     return [];
@@ -85,7 +140,59 @@ export const createLoan = async (
     
     if (!data) return null;
     
-    // Transform the Supabase response to match our Loan type
+    // Ensure status is one of the allowed values
+    let status: "active" | "returned" | "overdue" = "active";
+    if (data.status === "returned") status = "returned";
+    else if (data.status === "overdue") status = "overdue";
+    
+    // Transform book data to match Book interface
+    let book: Book | undefined;
+    if (data.book) {
+      const bookData = data.book;
+      book = {
+        id: bookData.id,
+        title: bookData.title,
+        isbn: bookData.isbn,
+        coverImage: bookData.cover_image || '/placeholder.svg',
+        description: bookData.description || '',
+        genre: bookData.genre || '',
+        publicationYear: bookData.publication_year || 0,
+        publisherId: bookData.publisher_id || '',
+        publisher: {
+          id: bookData.publisher_id || '',
+          name: '', // We don't have publisher data here
+          address: '',
+          contactInfo: ''
+        },
+        authors: [], // We don't have authors data here
+        available: bookData.available_copies > 0,
+        rating: bookData.rating,
+        totalCopies: bookData.total_copies,
+        availableCopies: bookData.available_copies
+      };
+    }
+    
+    // Transform member data to match User interface
+    let member: User | undefined;
+    if (data.member) {
+      const memberData = data.member;
+      const role = (memberData.role || 'member') as UserRole;
+      member = {
+        id: memberData.id,
+        name: memberData.name,
+        email: memberData.email,
+        role: role,
+        permissions: getRolePermissions(role),
+        membershipStartDate: memberData.membership_start_date,
+        address: memberData.address,
+        phoneNumber: memberData.phone_number,
+        profile: {
+          joinDate: memberData.membership_start_date || new Date().toISOString(),
+          membershipType: memberData.membership_type
+        }
+      };
+    }
+    
     return {
       id: data.id,
       memberId: data.member_id,
@@ -93,9 +200,9 @@ export const createLoan = async (
       loanDate: data.loan_date,
       dueDate: data.due_date,
       returnDate: data.return_date,
-      status: data.status,
-      book: data.book,
-      member: data.member
+      status,
+      book,
+      member
     };
   } catch (error) {
     console.error("Error in createLoan:", error);
