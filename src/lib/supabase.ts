@@ -1,51 +1,60 @@
 
 import { createClient } from '@supabase/supabase-js';
+import type { Database } from '@/integrations/supabase/types';
 
-// Provide default values for development, but use environment variables in production
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || 'https://your-supabase-url.supabase.co';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || 'your-anon-key';
+// Use the same Supabase URL and key across the application
+const supabaseUrl = "https://sfaaeqbuylsqlmcyjota.supabase.co";
+const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNmYWFlcWJ1eWxzcWxtY3lqb3RhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDM2NTAzNjYsImV4cCI6MjA1OTIyNjM2Nn0.sywEhVhqpDByp2ef4YcPBACTUXTBxUX-lP9YlN40Hy0";
 
-// Log a warning if using default values
-if (supabaseUrl === 'https://your-supabase-url.supabase.co' || 
-    supabaseAnonKey === 'your-anon-key') {
-  console.warn('Using default Supabase credentials. For production, set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY environment variables.');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});
 
 // Helper types for database
-export type Database = {
+export type { Database };
+
+// Extended Database Types for the entire application
+export type DatabaseExtended = Database & {
   public: {
     Tables: {
-      users: {
+      payments: {
         Row: {
           id: string;
-          name: string;
-          email: string;
-          role: string;
-          address?: string;
-          phone_number?: string;
-          membership_start_date: string;
+          user_id: string;
+          amount: number;
+          description: string;
+          payment_status: string;
+          payment_method: string;
           created_at: string;
         };
         Insert: {
-          name: string;
-          email: string;
-          role?: string;
-          address?: string;
-          phone_number?: string;
-          membership_start_date?: string;
+          user_id: string;
+          amount: number;
+          description: string;
+          payment_status: string;
+          payment_method: string;
         };
         Update: {
-          name?: string;
-          email?: string;
-          role?: string;
-          address?: string;
-          phone_number?: string;
-          membership_start_date?: string;
+          user_id?: string;
+          amount?: number;
+          description?: string;
+          payment_status?: string;
+          payment_method?: string;
         };
       };
-      // Add other tables as needed
     };
   };
 };
+
+// Use this type-safe client for tables that are not in the generated types
+export const supabaseExtended = createClient<DatabaseExtended>(supabaseUrl, supabaseAnonKey, {
+  auth: {
+    storage: localStorage,
+    persistSession: true,
+    autoRefreshToken: true,
+  }
+});

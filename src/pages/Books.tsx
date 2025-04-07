@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer';
 import BookCard from '@/components/ui/BookCard';
 import SearchBar from '@/components/ui/SearchBar';
 import { fetchBooks, getGenres } from '@/services/bookService';
+import { toast } from 'sonner';
 
 export const Books: React.FC = () => {
   const [books, setBooks] = useState<BookType[]>([]);
@@ -14,24 +15,33 @@ export const Books: React.FC = () => {
   const [genres, setGenres] = useState<string[]>([]);
   const [filters, setFilters] = useState<BookFilter>({});
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
 
   // Fetch books and genres on component mount
   useEffect(() => {
     const loadInitialData = async () => {
       setIsLoading(true);
+      setError(null);
       
       try {
+        console.log("Fetching all books...");
         // Fetch all books
         const booksData = await fetchBooks();
+        console.log(`Fetched ${booksData.length} books`);
+        
         setBooks(booksData);
         setFilteredBooks(booksData);
         
         // Fetch all genres
+        console.log("Fetching genres...");
         const genresData = await getGenres();
+        console.log(`Fetched ${genresData.length} genres`);
         setGenres(genresData);
       } catch (error) {
         console.error('Error loading data:', error);
+        setError(error instanceof Error ? error.message : String(error));
+        toast.error("Failed to load books. Check console for details.");
       } finally {
         setIsLoading(false);
       }
@@ -44,13 +54,18 @@ export const Books: React.FC = () => {
   useEffect(() => {
     const applyFilters = async () => {
       setIsLoading(true);
+      setError(null);
       
       try {
+        console.log("Applying filters:", filters);
         // Fetch filtered books from Supabase
         const filteredBooksData = await fetchBooks(filters);
+        console.log(`Fetched ${filteredBooksData.length} filtered books`);
         setFilteredBooks(filteredBooksData);
       } catch (error) {
         console.error('Error applying filters:', error);
+        setError(error instanceof Error ? error.message : String(error));
+        toast.error("Failed to filter books");
       } finally {
         setIsLoading(false);
       }
@@ -59,7 +74,6 @@ export const Books: React.FC = () => {
     applyFilters();
   }, [filters]);
 
-  // Fix #1: Update the handleSearch function to accept a BookFilter object instead of a string
   const handleSearch = (filterData: BookFilter) => {
     setFilters(prev => ({ ...prev, ...filterData }));
   };
@@ -77,6 +91,30 @@ export const Books: React.FC = () => {
 
   const handleBookClick = (bookId: string) => {
     navigate(`/books/${bookId}`);
+  };
+
+  const handleRetry = () => {
+    // Reset error and try loading again
+    setError(null);
+    setFilters({});
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        const booksData = await fetchBooks();
+        setBooks(booksData);
+        setFilteredBooks(booksData);
+        
+        const genresData = await getGenres();
+        setGenres(genresData);
+      } catch (error) {
+        console.error('Error loading data:', error);
+        setError(error instanceof Error ? error.message : String(error));
+        toast.error("Failed to load books");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    loadInitialData();
   };
 
   return (
@@ -133,10 +171,22 @@ export const Books: React.FC = () => {
                 <div className="absolute top-0 left-0 w-full h-full border-4 border-transparent border-t-primary rounded-full"></div>
               </div>
             </div>
+          ) : error ? (
+            <div className="text-center py-16 bg-red-50 rounded-lg">
+              <h2 className="text-2xl font-bold mb-2 text-red-700">Error Loading Books</h2>
+              <p className="text-gray-600 mb-6">
+                {error}
+              </p>
+              <button
+                className="px-4 py-2 bg-primary text-white rounded-md hover:bg-primary/90 transition-colors"
+                onClick={handleRetry}
+              >
+                Retry
+              </button>
+            </div>
           ) : filteredBooks.length > 0 ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {filteredBooks.map(book => (
-                // Fix #2: Update BookCard props to use 'className' instead of 'onClick'
                 <BookCard
                   key={book.id}
                   book={book}

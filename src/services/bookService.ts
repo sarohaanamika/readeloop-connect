@@ -1,9 +1,10 @@
-
 import { supabase } from "@/lib/supabase";
 import { Book, BookFilter } from "@/lib/types";
 
 export const fetchBooks = async (filters?: BookFilter): Promise<Book[]> => {
   try {
+    console.log("Starting fetchBooks with filters:", filters || "none");
+    
     let query = supabase
       .from('books')
       .select(`
@@ -37,15 +38,21 @@ export const fetchBooks = async (filters?: BookFilter): Promise<Book[]> => {
     const { data, error } = await query;
     
     if (error) {
+      console.error("Supabase query error:", error);
       throw new Error(`Error fetching books: ${error.message}`);
     }
     
-    if (!data) return [];
+    if (!data) {
+      console.log("No books data returned from query");
+      return [];
+    }
+    
+    console.log(`Successfully fetched ${data.length} books`);
     
     // Transform the Supabase response to match our Book type
     return data.map(book => {
       // Get authors from the nested book_authors array
-      const bookAuthors = book.authors.map((ba: any) => ba.author);
+      const bookAuthors = book.authors?.map((ba: any) => ba.author) || [];
       
       return {
         id: book.id,
@@ -66,7 +73,7 @@ export const fetchBooks = async (filters?: BookFilter): Promise<Book[]> => {
     });
   } catch (error) {
     console.error("Error in fetchBooks:", error);
-    return [];
+    throw error; // Rethrow to handle in UI components
   }
 };
 
@@ -115,6 +122,7 @@ export const fetchBookById = async (id: string): Promise<Book | null> => {
 
 export const getGenres = async (): Promise<string[]> => {
   try {
+    console.log("Fetching unique genres...");
     const { data, error } = await supabase
       .from('books')
       .select('genre')
@@ -130,10 +138,12 @@ export const getGenres = async (): Promise<string[]> => {
       if (book.genre) genres.add(book.genre);
     });
     
-    return Array.from(genres);
+    const uniqueGenres = Array.from(genres);
+    console.log(`Found ${uniqueGenres.length} unique genres`);
+    return uniqueGenres;
   } catch (error) {
     console.error("Error in getGenres:", error);
-    return [];
+    throw error; // Rethrow to handle in UI
   }
 };
 

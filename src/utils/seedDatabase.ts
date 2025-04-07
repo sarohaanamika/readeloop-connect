@@ -133,25 +133,34 @@ export const seedDatabase = async () => {
     return { success: true };
   } catch (error) {
     console.error("Database seeding failed:", error);
-    return { success: false, error };
+    return { success: false, error: error instanceof Error ? error.message : String(error) };
   }
 };
 
 // Utility to check if the database has been seeded
 export const checkIfDatabaseIsSeeded = async (): Promise<boolean> => {
   try {
+    console.log("Checking if database is seeded...");
+    // Test the connection first to provide clearer error messages
+    const { error: connectionError } = await supabase.from('books').select('count').limit(1);
+    if (connectionError) {
+      console.error("Database connection error:", connectionError);
+      throw new Error(`Database connection error: ${connectionError.message}`);
+    }
+    
     const { count, error } = await supabase
       .from('books')
       .select('*', { count: 'exact', head: true });
     
     if (error) {
       console.error("Error checking if database is seeded:", error);
-      return false;
+      throw new Error(`Error checking if database is seeded: ${error.message}`);
     }
     
+    console.log(`Database check: Found ${count} books.`);
     return (count !== null && count > 0);
   } catch (error) {
     console.error("Error checking if database is seeded:", error);
-    return false;
+    throw error; // Re-throw to allow proper error handling in the UI
   }
 };

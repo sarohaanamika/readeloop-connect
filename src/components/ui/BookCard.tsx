@@ -9,7 +9,7 @@ interface BookCardProps {
   book: Book;
   className?: string;
   featured?: boolean;
-  onClick?: () => void;  // Added onClick prop
+  onClick?: () => void;
 }
 
 const BookCard = ({ book, className, featured = false, onClick }: BookCardProps) => {
@@ -37,6 +37,17 @@ const BookCard = ({ book, className, featured = false, onClick }: BookCardProps)
       </div>
     );
   };
+
+  // Ensure authors array exists
+  const authors = book.authors || [];
+  
+  // Safely access values with fallbacks
+  const coverImage = book.coverImage || '/placeholder.svg';
+  const genre = book.genre || 'Unspecified';
+  const description = book.description || 'No description available';
+  const publicationYear = book.publicationYear || 'Unknown';
+  const availableCopies = book.availableCopies || 0;
+  const totalCopies = book.totalCopies || 0;
 
   // If onClick is provided, use a button instead of a Link
   const CardWrapper = ({ children }: { children: React.ReactNode }) => {
@@ -82,18 +93,22 @@ const BookCard = ({ book, className, featured = false, onClick }: BookCardProps)
         )}
       >
         <img
-          src={book.coverImage}
+          src={coverImage}
           alt={book.title}
           className={cn(
             "object-cover w-full h-full transition-all duration-700 ease-in-out book-cover-shadow",
             isHovered && "scale-105"
           )}
+          onError={(e) => {
+            const target = e.target as HTMLImageElement;
+            target.src = '/placeholder.svg';
+          }}
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
         
         <div className="absolute bottom-3 left-3 right-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
           <span className="inline-block px-2 py-1 bg-primary/90 text-white text-xs rounded-full">
-            {book.genre}
+            {genre}
           </span>
         </div>
         
@@ -114,25 +129,25 @@ const BookCard = ({ book, className, featured = false, onClick }: BookCardProps)
           </h3>
           
           <p className="text-sm text-gray-500">
-            by {book.authors.map(a => a.name).join(", ")}
+            by {authors.map(a => a?.name || 'Unknown').join(", ") || 'Unknown Author'}
           </p>
           
           <div className="flex items-center justify-between">
             {renderRating()}
-            <span className="text-sm text-gray-600">{book.publicationYear}</span>
+            <span className="text-sm text-gray-600">{publicationYear}</span>
           </div>
           
           {featured && (
             <p className="text-muted-foreground line-clamp-3 text-sm mt-2">
-              {book.description}
+              {description}
             </p>
           )}
         </div>
         
         <div className="flex items-center justify-between mt-4 pt-3 border-t border-border">
           <div className="text-sm">
-            <span className={book.availableCopies > 0 ? "text-green-600" : "text-red-500"}>
-              {book.availableCopies} / {book.totalCopies}
+            <span className={availableCopies > 0 ? "text-green-600" : "text-red-500"}>
+              {availableCopies} / {totalCopies}
             </span> available
           </div>
           
