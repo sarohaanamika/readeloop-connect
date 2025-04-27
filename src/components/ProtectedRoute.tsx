@@ -1,4 +1,3 @@
-
 import React, { ReactNode, useEffect, useState } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
@@ -17,7 +16,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const location = useLocation();
   const [isAuthorized, setIsAuthorized] = useState<boolean | null>(null);
 
-  // For debugging purposes
   useEffect(() => {
     console.log('ProtectedRoute check:', {
       isAuthenticated,

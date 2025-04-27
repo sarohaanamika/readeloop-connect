@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
+import { UserRole } from "@/lib/types";
 
 type SidebarLinkProps = {
   to: string;
@@ -142,11 +143,11 @@ const Sidebar = () => {
               count={3}
             />
 
-            {(user.role === "admin" || user.role === "staff") && (
+            {(user.role === UserRole.ADMIN || user.role === UserRole.STAFF) && (
               <>
                 <Separator className="my-4 bg-sidebar-border" />
                 
-                {user.role === "admin" && (
+                {user.role === UserRole.ADMIN && (
                   <SidebarLink 
                     to="/admin" 
                     icon={Settings} 
@@ -156,18 +157,20 @@ const Sidebar = () => {
                 )}
                 
                 <SidebarLink 
-                  to="/admin/books" 
+                  to="/manage/loans" 
                   icon={BookOpen} 
-                  label="Manage Books" 
-                  isActive={isActive("/admin/books")} 
+                  label={user.role === UserRole.ADMIN ? "Manage Books" : "Loan Management"} 
+                  isActive={isActive("/manage/loans")} 
                 />
                 
-                <SidebarLink 
-                  to="/admin/users" 
-                  icon={Users} 
-                  label="Manage Users" 
-                  isActive={isActive("/admin/users")} 
-                />
+                {user.role === UserRole.ADMIN && (
+                  <SidebarLink 
+                    to="/manage/members" 
+                    icon={Users} 
+                    label="Manage Users" 
+                    isActive={isActive("/manage/members")} 
+                  />
+                )}
               </>
             )}
           </nav>
