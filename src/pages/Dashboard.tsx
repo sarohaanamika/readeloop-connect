@@ -20,7 +20,7 @@ const Dashboard: React.FC = () => {
     return <Navigate to="/login" />;
   }
 
-  const { recommendations } = useRecommendations(user.id);
+  const { recommendations, isLoading: isLoadingRecommendations, error: recommendationsError } = useRecommendations(user?.id || "");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -56,7 +56,11 @@ const Dashboard: React.FC = () => {
             />
             
             {/* Recommendations Section */}
-            <BookRecommendations recommendations={recommendations} />
+            <BookRecommendations 
+              recommendations={recommendations}
+              isLoading={isLoadingRecommendations}
+              error={recommendationsError}
+            />
           </div>
         </main>
       </div>
