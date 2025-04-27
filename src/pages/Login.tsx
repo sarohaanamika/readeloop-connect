@@ -13,6 +13,7 @@ const Login = () => {
   const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [demoAccount, setDemoAccount] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   
@@ -45,6 +46,7 @@ const Login = () => {
   const handleDemoLogin = async (email: string, password: string) => {
     try {
       setIsLoading(true);
+      setDemoAccount(email);
       setError(null);
       console.log("Attempting demo login with:", email);
       await login(email, password);
@@ -55,6 +57,7 @@ const Login = () => {
       toast.error("Login failed. Please try again with the regular login form.");
     } finally {
       setIsLoading(false);
+      setDemoAccount(null);
     }
   };
 
@@ -125,10 +128,10 @@ const Login = () => {
                 onClick={() => handleDemoLogin("admin@athenaeum.com", "password123")}
                 disabled={isLoading}
               >
-                {isLoading ? (
+                {isLoading && demoAccount === "admin@athenaeum.com" ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Signing in as Admin...
                   </>
                 ) : "Sign in as Admin"}
               </Button>
@@ -140,10 +143,10 @@ const Login = () => {
                 onClick={() => handleDemoLogin("staff@athenaeum.com", "password123")}
                 disabled={isLoading}
               >
-                {isLoading ? (
+                {isLoading && demoAccount === "staff@athenaeum.com" ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Signing in as Staff...
                   </>
                 ) : "Sign in as Staff"}
               </Button>
@@ -155,10 +158,10 @@ const Login = () => {
                 onClick={() => handleDemoLogin("member@athenaeum.com", "password123")}
                 disabled={isLoading}
               >
-                {isLoading ? (
+                {isLoading && demoAccount === "member@athenaeum.com" ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Signing in...
+                    Signing in as Member...
                   </>
                 ) : "Sign in as Member"}
               </Button>

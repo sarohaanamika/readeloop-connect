@@ -87,54 +87,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
         if (error) {
           console.error("Error fetching user data:", error);
-          
-          // Try to create a basic user if we couldn't find one
-          const defaultRole = UserRole.MEMBER;
-          console.log("Creating basic user with default role:", defaultRole);
-          
-          return {
-            id: authUser.id,
-            email: authUser.email || '',
-            name: authUser.user_metadata?.name || 'User',
-            role: defaultRole,
-            permissions: getDefaultPermissions(defaultRole),
-            membershipStartDate: new Date().toISOString().split('T')[0],
-            membershipType: 'standard',
-            profile: {
-              avatarUrl: "/images/avatars/default.jpg",
-              membershipType: "Standard",
-              joinDate: new Date().toISOString().split('T')[0]
-            }
-          };
+          return null;
         }
         
         userData = data;
         console.log("Found user data:", userData);
       }
 
-      // If still no user data, create a basic user record
+      // If still no user data, return null - we don't want to create a user automatically
       if (!userData) {
-        const defaultRole = UserRole.MEMBER;
-        console.log("No user data found, creating basic user with default role:", defaultRole);
-        
-        return {
-          id: authUser.id,
-          email: authUser.email || '',
-          name: authUser.user_metadata?.name || 'User',
-          role: defaultRole,
-          permissions: getDefaultPermissions(defaultRole),
-          membershipStartDate: new Date().toISOString().split('T')[0],
-          membershipType: 'standard',
-          profile: {
-            avatarUrl: "/images/avatars/default.jpg",
-            membershipType: "Standard",
-            joinDate: new Date().toISOString().split('T')[0]
-          }
-        };
+        console.log("No user data found");
+        return null;
       }
 
       // Return user with formatted data
-      const role = (userData.role as UserRole) || UserRole.MEMBER;
+      const roleString = userData.role || 'member';
+      const role = roleString === 'admin' ? UserRole.ADMIN : 
+                  roleString === 'staff' ? UserRole.STAFF : UserRole.MEMBER;
+      
       console.log("Formatted user with role:", role);
       
       return {
@@ -164,13 +134,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   // This function will be used to update the authentication state
   const updateAuthState = async (session: any) => {
     if (session) {
-      const formattedUser = await formatUser(session.user);
-      if (formattedUser) {
-        console.log("Setting authenticated user:", formattedUser.email);
-        setUser(formattedUser);
-        setIsAuthenticated(true);
-      } else {
-        console.log("Failed to format user data");
+      try {
+        const formattedUser = await formatUser(session.user);
+        if (formattedUser) {
+          console.log("Setting authenticated user:", formattedUser.email, "with role:", formattedUser.role);
+          setUser(formattedUser);
+          setIsAuthenticated(true);
+        } else {
+          console.log("Failed to format user data");
+          setUser(null);
+          setIsAuthenticated(false);
+        }
+      } catch (error) {
+        console.error("Error updating auth state:", error);
         setUser(null);
         setIsAuthenticated(false);
       }
@@ -225,16 +201,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const login = async (email: string, password: string): Promise<void> => {
     try {
+      console.log("Attempting to sign in with:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
 
       if (error) {
+        console.error("Supabase auth error:", error);
         throw error;
       }
 
       if (data.user) {
+        console.log("Login successful for user:", data.user.email);
         // Auth state will be updated by the onAuthStateChange listener
         toast.success(`Login successful!`);
       }
