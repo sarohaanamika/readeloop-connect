@@ -1,6 +1,6 @@
 
-import React from "react";
-import { Navigate } from "react-router-dom";
+import React, { useEffect } from "react";
+import { Navigate, useNavigate } from "react-router-dom";
 import Header from "@/components/layout/Header";
 import Sidebar from "@/components/layout/Sidebar";
 import { useAuth } from "@/hooks/useAuth";
@@ -10,17 +10,38 @@ import { useRecommendations } from "@/hooks/useRecommendations";
 import DashboardStats from "@/components/dashboard/DashboardStats";
 import CurrentLoans from "@/components/dashboard/CurrentLoans";
 import BookRecommendations from "@/components/dashboard/BookRecommendations";
+import { Loader2 } from "lucide-react";
 
 const Dashboard: React.FC = () => {
-  const { user, isAuthenticated } = useAuth();
-  const { loans, activeLoans, overdueLoans, isLoading, handleReturnBook } = useLoans();
+  const { user, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
   
+  useEffect(() => {
+    console.log("Dashboard mounted, auth state:", { isAuthenticated, isLoading, user });
+    
+    if (!isLoading && !isAuthenticated) {
+      console.log("User is not authenticated, redirecting to login from Dashboard");
+      navigate("/login");
+    }
+  }, [isAuthenticated, isLoading, user, navigate]);
+  
+  // Show loading while checking authentication
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" />
+        <span>Loading authentication...</span>
+      </div>
+    );
+  }
+
   // Redirect if not authenticated
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !user) {
     return <Navigate to="/login" />;
   }
 
-  const { recommendations, isLoading: isLoadingRecommendations, error: recommendationsError } = useRecommendations(user?.id || "");
+  const { loans, activeLoans, overdueLoans, isLoading: loansLoading, handleReturnBook } = useLoans();
+  const { recommendations, isLoading: recommendationsLoading, error: recommendationsError } = useRecommendations(user?.id || "");
 
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
@@ -51,14 +72,14 @@ const Dashboard: React.FC = () => {
               loans={loans}
               activeLoans={activeLoans}
               overdueLoans={overdueLoans}
-              isLoading={isLoading}
+              isLoading={loansLoading}
               handleReturnBook={handleReturnBook}
             />
             
             {/* Recommendations Section */}
             <BookRecommendations 
               recommendations={recommendations}
-              isLoading={isLoadingRecommendations}
+              isLoading={recommendationsLoading}
               error={recommendationsError}
             />
           </div>

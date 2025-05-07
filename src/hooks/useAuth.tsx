@@ -166,12 +166,28 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         setIsLoading(true);
         console.log("Initializing auth...");
         
-        // Get current session
+        // Set up auth state change subscription first to avoid missing events
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(
+          async (event, session) => {
+            console.log("Auth state changed:", event);
+            
+            // Use setTimeout to prevent deadlocks with Supabase auth
+            setTimeout(async () => {
+              await updateAuthState(session);
+            }, 0);
+          }
+        );
+        
+        // Then get current session
         const { data: { session } } = await supabase.auth.getSession();
         
         console.log("Current session:", session ? "Found" : "Not found");
         
         await updateAuthState(session);
+        
+        return () => {
+          subscription.unsubscribe();
+        };
       } catch (error) {
         console.error("Auth initialization error:", error);
         setIsAuthenticated(false);
@@ -179,24 +195,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       }
     };
 
-    // Set up auth state change subscription
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log("Auth state changed:", event);
-        
-        // Use setTimeout to prevent deadlocks with Supabase auth
-        setTimeout(async () => {
-          await updateAuthState(session);
-        }, 0);
-      }
-    );
-
     initAuth();
-
-    // Cleanup subscription on unmount
-    return () => {
-      subscription.unsubscribe();
-    };
   }, []);
 
   const login = async (email: string, password: string): Promise<void> => {
@@ -214,8 +213,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       if (data.user) {
         console.log("Login successful for user:", data.user.email);
-        // Auth state will be updated by the onAuthStateChange listener
         toast.success(`Login successful!`);
+        // Auth state will be updated by the onAuthStateChange listener
       }
     } catch (error: any) {
       console.error("Login error:", error.message);

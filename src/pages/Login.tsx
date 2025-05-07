@@ -21,6 +21,7 @@ const Login = () => {
   const from = location.state?.from?.pathname || "/dashboard";
 
   useEffect(() => {
+    // This effect runs when isAuthenticated changes
     if (isAuthenticated) {
       console.log("User is authenticated, redirecting to:", from);
       navigate(from, { replace: true });
@@ -69,6 +70,12 @@ const Login = () => {
         <span className="ml-2">Loading authentication...</span>
       </div>
     );
+  }
+
+  // If already authenticated, redirect to dashboard
+  if (isAuthenticated) {
+    console.log("Already authenticated, redirecting to dashboard...");
+    return null; // Return null while redirecting to avoid flash of login page
   }
 
   return (

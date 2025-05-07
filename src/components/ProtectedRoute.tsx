@@ -1,7 +1,9 @@
+
 import React, { ReactNode, useEffect } from 'react';
 import { Navigate, Outlet, useLocation } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import { UserRole } from '../lib/types';
+import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
   children?: ReactNode;
@@ -28,7 +30,12 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   // Show loading state while checking authentication
   if (isLoading) {
     console.log('Auth is still loading, showing loading state');
-    return <div className="w-full h-screen flex items-center justify-center">Loading...</div>;
+    return (
+      <div className="w-full h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mr-2" /> 
+        Loading...
+      </div>
+    );
   }
 
   // Check if user is authenticated
